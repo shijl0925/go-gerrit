@@ -187,6 +187,9 @@ type ProjectOptions struct {
 
 	// Get all projects with the given state.
 	State string `url:"state,omitempty"`
+
+	// Get all projects, including those whose state is "HIDDEN". May not be used together with the state option.
+	All bool `url:"all,omitempty"`
 }
 
 type ProjectService struct {
