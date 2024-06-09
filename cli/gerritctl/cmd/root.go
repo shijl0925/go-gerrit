@@ -56,7 +56,9 @@ func (g *GerritMod) Init(config Config) error {
 	g.Context = context.Background()
 
 	client, err := gerrit.NewClient(g.Url)
-	client.SetBasicAuth(g.Username, g.Password)
+	if len(g.Username) != 0 && len(g.Password) != 0 {
+		client.SetBasicAuth(g.Username, g.Password)
+	}
 
 	g.Instance = client
 
