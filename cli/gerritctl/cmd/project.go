@@ -1,6 +1,7 @@
 package cmd
 
 import (
+	"errors"
 	"fmt"
 	"github.com/shijl0925/go-gerrit"
 	"github.com/spf13/cobra"
@@ -62,7 +63,14 @@ var projectList = &cobra.Command{
 		}
 
 		for name, project := range projects {
-			fmt.Printf("✅ Project Name: %s, %+v\n", name, project)
+			fmt.Printf("✅ Project Name: %s.\n", name)
+			if Verbose {
+				if out, err := ToIndentJSON(project); err != nil {
+					fmt.Println(err)
+				} else {
+					fmt.Printf("%+v\n", out)
+				}
+			}
 		}
 	},
 }
@@ -75,59 +83,66 @@ var projectGet = &cobra.Command{
 		projectName, _ := cmd.Flags().GetString("name")
 		project, _, err := gerritMod.Instance.Projects.Get(gerritMod.Context, projectName)
 		if err != nil {
+			fmt.Printf("❌ Unable to find the specific project: %s.\n %v", projectName, err)
+			os.Exit(1)
+		}
+
+		fmt.Printf("✅ Project Name: %s, Id: %s, State: %s\n", projectName, project.Raw.ID, project.Raw.State)
+		if Verbose {
+			if out, err := ToIndentJSON(*project.Raw); err != nil {
+				fmt.Println(err)
+			} else {
+				fmt.Printf("%+v\n", out)
+			}
+		}
+	},
+}
+
+// projectCreate Command
+var projectCreate = &cobra.Command{
+	Use:   "create",
+	Short: "Create a project.",
+	Run: func(cmd *cobra.Command, args []string) {
+		name, _ := cmd.Flags().GetString("name")
+		parent, _ := cmd.Flags().GetString("parent")
+		description, _ := cmd.Flags().GetString("description")
+
+		option := gerrit.ProjectInput{
+			Name:        name,
+			Parent:      parent,
+			Description: description,
+		}
+		_, _, err := gerritMod.Instance.Projects.Create(gerritMod.Context, name, &option)
+		if err != nil {
 			fmt.Println(err)
 			os.Exit(1)
 		}
 
-		fmt.Printf("✅ Project Name: %s, %+v\n", projectName, project.Raw)
+		fmt.Printf("✅ Create new project,Name: %s.\n", name)
 	},
 }
 
-//// projectCreate Command
-//var projectCreate = &cobra.Command{
-//	Use:   "create",
-//	Short: "Create a project.",
-//	Run: func(cmd *cobra.Command, args []string) {
-//		name, _ := cmd.Flags().GetString("name")
-//		parent, _ := cmd.Flags().GetString("parent")
-//		description, _ := cmd.Flags().GetString("description")
-//
-//		option := gerrit.ProjectInput{
-//			Name:        name,
-//			Parent:      parent,
-//			Description: description,
-//		}
-//		project, _, err := gerritMod.Instance.Projects.Create(gerritMod.Context, name, &option)
-//		if err != nil {
-//			fmt.Println(err)
-//			os.Exit(1)
-//		}
-//
-//		fmt.Printf("✅ Create new project,Name: %s, %+v\n", name, project.Raw)
-//	},
-//}
-//
-//// projectDelete Command
-//var projectDelete = &cobra.Command{
-//	Use:   "delete",
-//	Short: "Delete a project.",
-//	Run: func(cmd *cobra.Command, args []string) {
-//		name, _ := cmd.Flags().GetString("name")
-//		project, _, err := gerritMod.Instance.Projects.Get(gerritMod.Context, name)
-//		if err != nil {
-//			fmt.Println(err)
-//			os.Exit(1)
-//		}
-//
-//		input := gerrit.DeleteOptionsInfo{Force: true, Preserve: true}
-//		if _, _, err := project.Delete(gerritMod.Context, &input); err != nil {
-//			fmt.Println(err)
-//			os.Exit(1)
-//		}
-//
-//		fmt.Printf("✅ Delete project,Name: %s.\n", name)
-//	},
-//}
+// projectDelete Command
+var projectDelete = &cobra.Command{
+	Use:   "delete",
+	Short: "Delete a project.",
+	Run: func(cmd *cobra.Command, args []string) {
+		name, _ := cmd.Flags().GetString("name")
+		project, _, err := gerritMod.Instance.Projects.Get(gerritMod.Context, name)
+		if err != nil {
+			fmt.Printf("❌ Unable to find the specific project: %s.\n %v", name, err)
+			os.Exit(1)
+		}
+
+		input := gerrit.DeleteOptionsInfo{Force: true, Preserve: true}
+		if _, _, err := project.Delete(gerritMod.Context, &input); err != nil {
+			fmt.Println(err)
+			os.Exit(1)
+		}
+
+		fmt.Printf("✅ Delete project,Name: %s.\n", name)
+	},
+}
 
 // branchList Command
 var branchList = &cobra.Command{
@@ -137,7 +152,7 @@ var branchList = &cobra.Command{
 		projectName, _ := cmd.Flags().GetString("name")
 		project, _, err := gerritMod.Instance.Projects.Get(gerritMod.Context, projectName)
 		if err != nil {
-			fmt.Println(err)
+			fmt.Printf("❌ Unable to find the specific project: %s.\n %v", projectName, err)
 			os.Exit(1)
 		}
 
@@ -155,7 +170,14 @@ var branchList = &cobra.Command{
 		branches, _, err := project.Branches.List(gerritMod.Context, &option)
 
 		for _, branch := range *branches {
-			fmt.Printf("✅ Branch Name: %s, %+v\n", branch.Ref, branch)
+			fmt.Printf("✅ Branch Name: %s.\n", branch.Ref)
+			if Verbose {
+				if out, err := ToIndentJSON(branch); err != nil {
+					fmt.Println(err)
+				} else {
+					fmt.Printf("%+v\n", out)
+				}
+			}
 		}
 	},
 }
@@ -168,7 +190,7 @@ var tagList = &cobra.Command{
 		projectName, _ := cmd.Flags().GetString("name")
 		project, _, err := gerritMod.Instance.Projects.Get(gerritMod.Context, projectName)
 		if err != nil {
-			fmt.Println(err)
+			fmt.Printf("❌ Unable to find the specific project: %s.\n %v", projectName, err)
 			os.Exit(1)
 		}
 
@@ -185,7 +207,14 @@ var tagList = &cobra.Command{
 		tags, _, err := project.Tags.List(gerritMod.Context, &option)
 
 		for _, tag := range *tags {
-			fmt.Printf("✅ Tag Name: %s, %+v\n", tag.Ref, tag)
+			fmt.Printf("✅ Tag Name: %s.\n", tag.Ref)
+			if Verbose {
+				if out, err := ToIndentJSON(tag); err != nil {
+					fmt.Println(err)
+				} else {
+					fmt.Printf("%+v\n", out)
+				}
+			}
 		}
 	},
 }
@@ -207,19 +236,22 @@ func init() {
 	projectList.Flags().StringP("branch", "b", "", "Only include projects with the given branch")
 
 	project.AddCommand(projectGet)
-	projectGet.Flags().StringP("name", "n", "", "The name of the project")
+	projectGet.Flags().StringP("name", "n", "", "The name of the project (required)")
+	projectGet.MarkFlagRequired("name")
 
-	//project.AddCommand(projectCreate)
-	//projectCreate.Flags().StringP("name", "n", "", "The name of the project")
-	//projectCreate.Flags().StringP("parent", "P", "", "The name of the parent project")
-	//projectCreate.Flags().StringP("description", "D", "", "The description of the project")
-	//
-	//project.AddCommand(projectDelete)
-	//projectDelete.Flags().StringP("name", "n", "", "The name of the project")
+	project.AddCommand(projectCreate)
+	projectCreate.Flags().StringP("name", "n", "", "The name of the project")
+	projectCreate.Flags().StringP("parent", "P", "", "The name of the parent project")
+	projectCreate.Flags().StringP("description", "D", "", "The description of the project")
+
+	project.AddCommand(projectDelete)
+	projectDelete.Flags().StringP("name", "n", "", "The name of the project (required)")
+	projectDelete.MarkFlagRequired("name")
 
 	project.AddCommand(branch)
 	branch.AddCommand(branchList)
-	branchList.Flags().StringP("name", "n", "", "The name of the project")
+	branchList.Flags().StringP("name", "n", "", "The name of the project (required)")
+	branchList.MarkFlagRequired("name")
 	branchList.Flags().IntP("limit", "l", 0, "Limit the number of branches to be included in the results")
 	branchList.Flags().IntP("skip", "S", 0, "Skip the first N branches in the results")
 	branchList.Flags().StringP("substring", "u", "", "Only include branches with the given substring")
@@ -227,7 +259,8 @@ func init() {
 
 	project.AddCommand(tag)
 	tag.AddCommand(tagList)
-	tagList.Flags().StringP("name", "n", "", "The name of the project")
+	tagList.Flags().StringP("name", "n", "", "The name of the project (required)")
+	tagList.MarkFlagRequired("name")
 	tagList.Flags().IntP("limit", "l", 0, "Limit the number of tags to be included in the results")
 	tagList.Flags().IntP("skip", "S", 0, "Skip the first N tags in the results")
 	tagList.Flags().StringP("substring", "u", "", "Only include tags with the given substring")

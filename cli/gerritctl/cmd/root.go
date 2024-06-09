@@ -19,11 +19,12 @@ package cmd
 import (
 	"context"
 	"fmt"
+	"os"
+	"path/filepath"
+
 	"github.com/shijl0925/go-gerrit"
 	"github.com/spf13/cobra"
 	"github.com/spf13/viper"
-	"os"
-	"path/filepath"
 )
 
 // rootCmd represents the base command when called without any subcommands
@@ -130,9 +131,12 @@ var gerritConfig Config
 var gerritMod GerritMod
 var configFile string
 
+var Verbose bool
+
 func init() {
 	cobra.OnInitialize(initConfig)
 	rootCmd.PersistentFlags().StringVarP(&configFile, "config", "", "", "Path to config file")
+	rootCmd.PersistentFlags().BoolVarP(&Verbose, "verbose", "v", false, "verbose output")
 }
 
 func initConfig() {
