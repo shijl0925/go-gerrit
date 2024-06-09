@@ -19,13 +19,13 @@ type Requester struct {
 	baseURL *url.URL
 
 	// Gerrit service for authentication.
-	username, password string
+	username, password, authType string
 }
 
 func (r *Requester) NewRequest(ctx context.Context, method, endpoint string, opt interface{}) (*http.Request, error) {
 	hasAuth := false
 
-	if len(r.username) != 0 && len(r.password) != 0 {
+	if len(r.authType) != 0 {
 		hasAuth = true
 	}
 
@@ -74,7 +74,14 @@ func (r *Requester) NewRequest(ctx context.Context, method, endpoint string, opt
 
 	// Apply Authentication
 	if hasAuth {
-		req.SetBasicAuth(r.username, r.password)
+		switch r.authType {
+		case "cookie":
+			req.AddCookie(&http.Cookie{Name: r.username, Value: r.password})
+		case "digest":
+			// todo
+		default:
+			req.SetBasicAuth(r.username, r.password)
+		}
 	}
 
 	// Request compact JSON

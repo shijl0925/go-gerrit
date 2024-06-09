@@ -17,12 +17,12 @@ type Gerrit struct {
 	Config   *ConfigService
 }
 
-func NewClient(gerritURL string, username string, password string) (*Gerrit, error) {
+func NewClient(gerritURL string) (*Gerrit, error) {
 	client := &http.Client{
 		Timeout: 15 * time.Second, // 设置超时时间
 	}
 
-	r := &Requester{client: client, username: username, password: password}
+	r := &Requester{client: client}
 
 	if baseURL, err := SetBaseURL(gerritURL); err != nil {
 		return nil, err
@@ -41,4 +41,22 @@ func NewClient(gerritURL string, username string, password string) (*Gerrit, err
 	gerrit.Config = &ConfigService{gerrit: gerrit}
 
 	return gerrit, nil
+}
+
+func (g *Gerrit) SetBasicAuth(username, password string) {
+	g.Requester.authType = "basic"
+	g.Requester.username = username
+	g.Requester.password = password
+}
+
+func (g *Gerrit) SetDigestAuth(username, password string) {
+	g.Requester.authType = "digest"
+	g.Requester.username = username
+	g.Requester.password = password
+}
+
+func (g *Gerrit) SetCookieAuth(username, password string) {
+	g.Requester.authType = "cookie"
+	g.Requester.username = username
+	g.Requester.password = password
 }
