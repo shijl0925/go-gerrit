@@ -201,6 +201,11 @@ func (r *Requester) Do(req *http.Request, v interface{}) (*http.Response, error)
 			//log.Println(string(body))
 
 			err = json.Unmarshal(body, v)
+
+			//io.CopyN(ioutil.Discard, resp.Body, 5)
+			//if err := json.NewDecoder(resp.Body).Decode(&v); err != nil {
+			//	return resp, err
+			//}
 		}
 	}
 

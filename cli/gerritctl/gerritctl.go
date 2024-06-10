@@ -15,7 +15,7 @@ limitations under the License.
 */
 package main
 
-import "github.com/shijl0925/gerritctl/cmd"
+import "github.com/shijl0925/go-gerrit/cli/gerritctl/cmd"
 
 func main() {
 	cmd.Execute()

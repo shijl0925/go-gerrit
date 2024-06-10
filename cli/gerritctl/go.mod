@@ -1,4 +1,4 @@
-module github.com/shijl0925/gerritctl
+module github.com/shijl0925/go-gerrit/cli/gerritctl
 
 go 1.20
 

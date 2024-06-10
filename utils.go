@@ -2,13 +2,11 @@ package gerrit
 
 import (
 	"bytes"
-	"encoding/json"
 	"fmt"
 	"github.com/google/go-querystring/query"
 	"io"
 	"net/http"
 	"net/url"
-	"sort"
 	"strings"
 )
 
@@ -64,41 +62,10 @@ func CheckResponse(r *http.Response) error {
 	data, err := io.ReadAll(r.Body)
 	if err == nil && data != nil {
 		errorResponse.Body = data
-
-		var raw interface{}
-		if err := json.Unmarshal(data, &raw); err != nil {
-			errorResponse.Message = fmt.Sprintf("failed to parse unknown error format: %s", data)
-		} else {
-			errorResponse.Message = parseError(raw)
-		}
+		errorResponse.Message = fmt.Sprintf("%s", data)
 	}
 
 	return errorResponse
-}
-
-func parseError(raw interface{}) string {
-	switch raw := raw.(type) {
-	case string:
-		return raw
-
-	case []interface{}:
-		var errs []string
-		for _, v := range raw {
-			errs = append(errs, parseError(v))
-		}
-		return fmt.Sprintf("[%s]", strings.Join(errs, ", "))
-
-	case map[string]interface{}:
-		var errs []string
-		for k, v := range raw {
-			errs = append(errs, fmt.Sprintf("{%s: %s}", k, parseError(v)))
-		}
-		sort.Strings(errs)
-		return strings.Join(errs, ", ")
-
-	default:
-		return fmt.Sprintf("failed to parse unexpected error type: %T", raw)
-	}
 }
 
 func addOptions(s string, opt interface{}) (string, error) {
