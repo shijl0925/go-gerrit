@@ -3,7 +3,7 @@ module github.com/shijl0925/gerritctl
 go 1.20
 
 require (
-	github.com/shijl0925/go-gerrit v0.0.0-20240610014848-89888b5b363f
+	github.com/shijl0925/go-gerrit v0.0.0-20240610041831-4860139f8227
 	github.com/spf13/cobra v1.1.3
 	github.com/spf13/viper v1.7.0
 )

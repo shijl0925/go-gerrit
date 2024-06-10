@@ -149,7 +149,7 @@ var branchList = &cobra.Command{
 	Use:   "list",
 	Short: "List the branches of a project.",
 	Run: func(cmd *cobra.Command, args []string) {
-		projectName, _ := cmd.Flags().GetString("name")
+		projectName, _ := cmd.Flags().GetString("project_name")
 		project, _, err := gerritMod.Instance.Projects.Get(gerritMod.Context, projectName)
 		if err != nil {
 			fmt.Printf("❌ Unable to find the specific project: %s.\n %v", projectName, err)
@@ -182,12 +182,93 @@ var branchList = &cobra.Command{
 	},
 }
 
+// branchCreate Command
+var branchCreate = &cobra.Command{
+	Use:   "create",
+	Short: "Create a branch.",
+	Run: func(cmd *cobra.Command, args []string) {
+		projectName, _ := cmd.Flags().GetString("project_name")
+		branchName, _ := cmd.Flags().GetString("name")
+		revision, _ := cmd.Flags().GetString("revision")
+		input := gerrit.BranchInput{
+			Ref:      branchName,
+			Revision: revision,
+		}
+		project, _, err := gerritMod.Instance.Projects.Get(gerritMod.Context, projectName)
+		if err != nil {
+			fmt.Printf("❌ Unable to find the specific project: %s.\n %v", projectName, err)
+			os.Exit(1)
+		}
+		if _, _, err := project.Branches.Create(gerritMod.Context, branchName, &input); err != nil {
+			fmt.Println(err)
+			os.Exit(1)
+		}
+		fmt.Printf("✅ Create new branch,Name: %s.\n", branchName)
+	},
+}
+
+// branchGet Command
+var branchGet = &cobra.Command{
+	Use:   "show",
+	Short: "Retrieve the branch of a project.",
+	Run: func(cmd *cobra.Command, args []string) {
+		projectName, _ := cmd.Flags().GetString("project_name")
+		project, _, err := gerritMod.Instance.Projects.Get(gerritMod.Context, projectName)
+		if err != nil {
+			fmt.Printf("❌ Unable to find the specific project: %s.\n %v", projectName, err)
+			os.Exit(1)
+		}
+
+		branchName, _ := cmd.Flags().GetString("name")
+		branch, _, err := project.Branches.Get(gerritMod.Context, branchName)
+		if err != nil {
+			fmt.Printf("❌ Unable to find the specific branch: %s.\n %v", branchName, err)
+			os.Exit(1)
+		}
+		fmt.Printf("✅ Branch Name: %s.\n", branch.Raw.Ref)
+		if Verbose {
+			if out, err := ToIndentJSON(*branch.Raw); err != nil {
+				fmt.Println(err)
+			} else {
+				fmt.Printf("%+v\n", out)
+			}
+		}
+	},
+}
+
+// branchDelete Command
+var branchDelete = &cobra.Command{
+	Use:   "delete",
+	Short: "Delete the branch of a project.",
+	Run: func(cmd *cobra.Command, args []string) {
+		projectName, _ := cmd.Flags().GetString("project_name")
+		project, _, err := gerritMod.Instance.Projects.Get(gerritMod.Context, projectName)
+		if err != nil {
+			fmt.Printf("❌ Unable to find the specific project: %s.\n %v", projectName, err)
+			os.Exit(1)
+		}
+
+		branchName, _ := cmd.Flags().GetString("name")
+		branch, _, err := project.Branches.Get(gerritMod.Context, branchName)
+		if err != nil {
+			fmt.Printf("❌ Unable to find the specific branch: %s.\n %v", branchName, err)
+			os.Exit(1)
+		}
+		if _, _, err := branch.Delete(gerritMod.Context); err != nil {
+			fmt.Println(err)
+			os.Exit(1)
+		}
+
+		fmt.Printf("✅ Delete branch, name: %s.\n", branch.Raw.Ref)
+	},
+}
+
 // tagList Command
 var tagList = &cobra.Command{
 	Use:   "list",
 	Short: "List the tags of a project.",
 	Run: func(cmd *cobra.Command, args []string) {
-		projectName, _ := cmd.Flags().GetString("name")
+		projectName, _ := cmd.Flags().GetString("project_name")
 		project, _, err := gerritMod.Instance.Projects.Get(gerritMod.Context, projectName)
 		if err != nil {
 			fmt.Printf("❌ Unable to find the specific project: %s.\n %v", projectName, err)
@@ -216,6 +297,86 @@ var tagList = &cobra.Command{
 				}
 			}
 		}
+	},
+}
+
+// tagCreate Command
+var tagCreate = &cobra.Command{
+	Use:   "create",
+	Short: "Create a tag.",
+	Run: func(cmd *cobra.Command, args []string) {
+		projectName, _ := cmd.Flags().GetString("project_name")
+		tagName, _ := cmd.Flags().GetString("name")
+		revision, _ := cmd.Flags().GetString("revision")
+		input := gerrit.TagInput{
+			Revision: revision,
+		}
+		project, _, err := gerritMod.Instance.Projects.Get(gerritMod.Context, projectName)
+		if err != nil {
+			fmt.Printf("❌ Unable to find the specific project: %s.\n %v", projectName, err)
+			os.Exit(1)
+		}
+		if _, _, err := project.Tags.Create(gerritMod.Context, tagName, &input); err != nil {
+			fmt.Println(err)
+			os.Exit(1)
+		}
+		fmt.Printf("✅ Create new tag,Name: %s.\n", tagName)
+	},
+}
+
+// tagGet Command
+var tagGet = &cobra.Command{
+	Use:   "show",
+	Short: "Retrieve the tag of a project.",
+	Run: func(cmd *cobra.Command, args []string) {
+		projectName, _ := cmd.Flags().GetString("project_name")
+		project, _, err := gerritMod.Instance.Projects.Get(gerritMod.Context, projectName)
+		if err != nil {
+			fmt.Printf("❌ Unable to find the specific project: %s.\n %v", projectName, err)
+			os.Exit(1)
+		}
+
+		tagName, _ := cmd.Flags().GetString("name")
+		tag, _, err := project.Tags.Get(gerritMod.Context, tagName)
+		if err != nil {
+			fmt.Printf("❌ Unable to find the specific tag: %s.\n %v", tagName, err)
+			os.Exit(1)
+		}
+		fmt.Printf("✅ Tag Name: %s.\n", tag.Raw.Ref)
+		if Verbose {
+			if out, err := ToIndentJSON(*tag.Raw); err != nil {
+				fmt.Println(err)
+			} else {
+				fmt.Printf("%+v\n", out)
+			}
+		}
+	},
+}
+
+// tagDelete Command
+var tagDelete = &cobra.Command{
+	Use:   "delete",
+	Short: "Delete the tag of a project.",
+	Run: func(cmd *cobra.Command, args []string) {
+		projectName, _ := cmd.Flags().GetString("project_name")
+		project, _, err := gerritMod.Instance.Projects.Get(gerritMod.Context, projectName)
+		if err != nil {
+			fmt.Printf("❌ Unable to find the specific project: %s.\n %v", projectName, err)
+			os.Exit(1)
+		}
+
+		tagName, _ := cmd.Flags().GetString("name")
+		tag, _, err := project.Tags.Get(gerritMod.Context, tagName)
+		if err != nil {
+			fmt.Printf("❌ Unable to find the specific tag: %s.\n %v", tagName, err)
+			os.Exit(1)
+		}
+		if _, _, err := tag.Delete(gerritMod.Context); err != nil {
+			fmt.Println(err)
+			os.Exit(1)
+		}
+
+		fmt.Printf("✅ Delete Tag,Name: %s.\n", tag.Raw.Ref)
 	},
 }
 
@@ -250,19 +411,59 @@ func init() {
 
 	project.AddCommand(branch)
 	branch.AddCommand(branchList)
-	branchList.Flags().StringP("name", "n", "", "The name of the project (required)")
-	branchList.MarkFlagRequired("name")
+	branchList.Flags().StringP("project_name", "p", "", "The name of the project (required)")
+	branchList.MarkFlagRequired("project_name")
 	branchList.Flags().IntP("limit", "l", 0, "Limit the number of branches to be included in the results")
 	branchList.Flags().IntP("skip", "S", 0, "Skip the first N branches in the results")
 	branchList.Flags().StringP("substring", "u", "", "Only include branches with the given substring")
 	branchList.Flags().StringP("regex", "r", "", "Only include branches matching the given regular expression")
 
+	branch.AddCommand(branchCreate)
+	branchCreate.Flags().StringP("project_name", "p", "", "The name of the project (required)")
+	branchCreate.MarkFlagRequired("project_name")
+	branchCreate.Flags().StringP("name", "n", "", "The name of the branch (required)")
+	branchCreate.MarkFlagRequired("name")
+	branchCreate.Flags().StringP("revision", "r", "", "The revision of the branch")
+	branchCreate.MarkFlagRequired("revision")
+
+	branch.AddCommand(branchGet)
+	branchGet.Flags().StringP("project_name", "p", "", "The name of the project (required)")
+	branchGet.MarkFlagRequired("project_name")
+	branchGet.Flags().StringP("name", "n", "", "The name of the branch (required)")
+	branchGet.MarkFlagRequired("name")
+
+	branch.AddCommand(branchDelete)
+	branchDelete.Flags().StringP("project_name", "p", "", "The name of the project (required)")
+	branchDelete.MarkFlagRequired("project_name")
+	branchDelete.Flags().StringP("name", "n", "", "The name of the branch (required)")
+	branchDelete.MarkFlagRequired("name")
+
 	project.AddCommand(tag)
 	tag.AddCommand(tagList)
-	tagList.Flags().StringP("name", "n", "", "The name of the project (required)")
-	tagList.MarkFlagRequired("name")
+	tagList.Flags().StringP("project_name", "p", "", "The name of the project (required)")
+	tagList.MarkFlagRequired("project_name")
 	tagList.Flags().IntP("limit", "l", 0, "Limit the number of tags to be included in the results")
 	tagList.Flags().IntP("skip", "S", 0, "Skip the first N tags in the results")
 	tagList.Flags().StringP("substring", "u", "", "Only include tags with the given substring")
 	tagList.Flags().StringP("regex", "r", "", "Only include tags matching the given regular expression")
+
+	tag.AddCommand(tagCreate)
+	tagCreate.Flags().StringP("project_name", "p", "", "The name of the project (required)")
+	tagCreate.MarkFlagRequired("project_name")
+	tagCreate.Flags().StringP("name", "n", "", "The name of the tag (required)")
+	tagCreate.MarkFlagRequired("name")
+	tagCreate.Flags().StringP("revision", "r", "", "The revision of the tag")
+	tagCreate.MarkFlagRequired("revision")
+
+	tag.AddCommand(tagGet)
+	tagGet.Flags().StringP("project_name", "p", "", "The name of the project (required)")
+	tagGet.MarkFlagRequired("project_name")
+	tagGet.Flags().StringP("name", "n", "", "The name of the tag (required)")
+	tagGet.MarkFlagRequired("name")
+
+	tag.AddCommand(tagDelete)
+	tagDelete.Flags().StringP("project_name", "p", "", "The name of the project (required)")
+	tagDelete.MarkFlagRequired("project_name")
+	tagDelete.Flags().StringP("name", "n", "", "The name of the tag (required)")
+	tagDelete.MarkFlagRequired("name")
 }
