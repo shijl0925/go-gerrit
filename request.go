@@ -4,14 +4,13 @@ import (
 	"bytes"
 	"context"
 	"crypto/tls"
-	"time"
-
 	"encoding/json"
 	"io"
 	"net/http"
 	"net/url"
 	"reflect"
 	"strings"
+	"time"
 )
 
 var transport = &http.Transport{
@@ -23,8 +22,8 @@ var transport = &http.Transport{
 	TLSClientConfig:     &tls.Config{InsecureSkipVerify: true},
 }
 
-// defaultClient is the default http client for got requests.
-var defaultClient = &http.Client{
+// DefaultClient is the default http client for got requests.
+var DefaultClient = &http.Client{
 	Transport: transport,
 	Timeout:   30 * time.Second,
 }

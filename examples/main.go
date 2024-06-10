@@ -7,7 +7,7 @@ import (
 )
 
 func main() {
-	client, _ := gerrit.NewClient("https://review.lineageos.org", nil)
+	client, _ := gerrit.NewClient("https://review.lineageos.org", gerrit.DefaultClient)
 
 	ctx := context.Background()
 
