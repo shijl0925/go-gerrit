@@ -17,16 +17,62 @@ import (
 var transport = &http.Transport{
 	Proxy:               http.ProxyFromEnvironment,
 	DisableCompression:  true,
-	MaxIdleConns:        10,
-	IdleConnTimeout:     30 * time.Second,
-	TLSHandshakeTimeout: 10 * time.Second,
+	MaxIdleConns:        100, // 调整为100以允许更多的连接复用
+	IdleConnTimeout:     60 * time.Second,
+	TLSHandshakeTimeout: 15 * time.Second,
 	TLSClientConfig:     &tls.Config{InsecureSkipVerify: true},
 }
 
 // defaultClient is the default http client for got requests.
 var defaultClient = &http.Client{
 	Transport: transport,
-	Timeout:   15 * time.Second,
+	Timeout:   30 * time.Second,
+}
+
+// 定义认证类型的常量
+const (
+	AuthTypeCookie = "cookie"
+	AuthTypeDigest = "digest"
+	AuthTypeBasic  = "basic"
+)
+
+// AuthMethod 接口定义了各种认证方法
+type AuthMethod interface {
+	ApplyAuthentication(req *http.Request)
+}
+
+// CookieAuth 实现了基于Cookie的认证
+type CookieAuth struct {
+	Username string
+	Password string
+}
+
+func (c *CookieAuth) ApplyAuthentication(req *http.Request) {
+	// 注意：在生产环境中，应确保使用HTTPS和设置HttpOnly、Secure属性
+	req.AddCookie(&http.Cookie{
+		Name:  c.Username,
+		Value: c.Password,
+	})
+}
+
+// BasicAuth 实现了基本认证
+type BasicAuth struct {
+	Username string
+	Password string
+}
+
+func (b *BasicAuth) ApplyAuthentication(req *http.Request) {
+	req.SetBasicAuth(b.Username, b.Password)
+}
+
+// DigestAuth 实现了摘要认证（示例代码，需要根据实际需求完成具体实现）
+type DigestAuth struct {
+	Username string
+	Password string
+}
+
+func (d *DigestAuth) ApplyAuthentication(req *http.Request) {
+	// TODO: 实现摘要认证逻辑
 }
 
 type Requester struct {
@@ -93,12 +139,26 @@ func (r *Requester) NewRequest(ctx context.Context, method, endpoint string, opt
 	// Apply Authentication
 	if hasAuth {
 		switch r.authType {
-		case "cookie":
-			req.AddCookie(&http.Cookie{Name: r.username, Value: r.password})
-		case "digest":
-			// todo
+		case AuthTypeCookie:
+			cookieAuth := &CookieAuth{
+				Username: r.username,
+				Password: r.password,
+			}
+			cookieAuth.ApplyAuthentication(req)
+
+		case AuthTypeDigest:
+			digestAuth := &DigestAuth{
+				Username: r.username,
+				Password: r.password,
+			}
+			digestAuth.ApplyAuthentication(req)
+
 		default:
-			req.SetBasicAuth(r.username, r.password)
+			basicAuth := &BasicAuth{
+				Username: r.username,
+				Password: r.password,
+			}
+			basicAuth.ApplyAuthentication(req)
 		}
 	}
 

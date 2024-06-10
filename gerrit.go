@@ -1,6 +1,7 @@
 package gerrit
 
 import (
+	"log"
 	"net/http"
 )
 
@@ -18,7 +19,7 @@ type Gerrit struct {
 
 func NewClient(gerritURL string, httpClient *http.Client) (*Gerrit, error) {
 	if httpClient == nil {
-		httpClient = defaultClient
+		httpClient = http.DefaultClient
 	}
 
 	r := &Requester{client: httpClient}
@@ -42,20 +43,47 @@ func NewClient(gerritURL string, httpClient *http.Client) (*Gerrit, error) {
 	return gerrit, nil
 }
 
-func (g *Gerrit) SetBasicAuth(username, password string) {
-	g.Requester.authType = "basic"
+// SetAuth 用于设置不同类型的认证方式。
+// authType: 认证类型，可以是 "basic"、"digest" 或 "cookie"。
+// username: 用户名。
+// password: 密码。
+func (g *Gerrit) SetAuth(authType, username, password string) {
+	// 参数验证
+	if authType == "" || username == "" || password == "" {
+		// 根据实际情况，这里可以记录日志、抛出异常或返回错误
+		log.Fatal("authType, username, and password cannot be empty")
+		return
+	}
+
+	// 对authType值进行校验，确保其为允许的值之一
+	allowedAuthTypes := []string{"basic", "digest", "cookie"}
+
+	found := false
+	for _, allowedType := range allowedAuthTypes {
+		if authType == allowedType {
+			found = true
+			break
+		}
+	}
+	if !found {
+		// 根据实际情况，这里可以记录日志、抛出异常或返回错误
+		log.Fatal("Unsupported authType")
+		return
+	}
+
+	g.Requester.authType = authType
 	g.Requester.username = username
 	g.Requester.password = password
+}
+
+func (g *Gerrit) SetBasicAuth(username, password string) {
+	g.SetAuth("basic", username, password)
 }
 
 func (g *Gerrit) SetDigestAuth(username, password string) {
-	g.Requester.authType = "digest"
-	g.Requester.username = username
-	g.Requester.password = password
+	g.SetAuth("digest", username, password)
 }
 
 func (g *Gerrit) SetCookieAuth(username, password string) {
-	g.Requester.authType = "cookie"
-	g.Requester.username = username
-	g.Requester.password = password
+	g.SetAuth("cookie", username, password)
 }
