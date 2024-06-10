@@ -3,6 +3,9 @@ package gerrit
 import (
 	"bytes"
 	"context"
+	"crypto/tls"
+	"time"
+
 	"encoding/json"
 	"io"
 	"net/http"
@@ -10,6 +13,21 @@ import (
 	"reflect"
 	"strings"
 )
+
+var transport = &http.Transport{
+	Proxy:               http.ProxyFromEnvironment,
+	DisableCompression:  true,
+	MaxIdleConns:        10,
+	IdleConnTimeout:     30 * time.Second,
+	TLSHandshakeTimeout: 10 * time.Second,
+	TLSClientConfig:     &tls.Config{InsecureSkipVerify: true},
+}
+
+// defaultClient is the default http client for got requests.
+var defaultClient = &http.Client{
+	Transport: transport,
+	Timeout:   15 * time.Second,
+}
 
 type Requester struct {
 	// client is the HTTP client used to communicate with the API.
@@ -25,7 +43,7 @@ type Requester struct {
 func (r *Requester) NewRequest(ctx context.Context, method, endpoint string, opt interface{}) (*http.Request, error) {
 	hasAuth := false
 
-	if len(r.authType) != 0 {
+	if len(r.authType) != 0 && len(r.username) != 0 && len(r.password) != 0 {
 		hasAuth = true
 	}
 

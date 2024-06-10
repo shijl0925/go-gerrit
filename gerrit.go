@@ -2,7 +2,6 @@ package gerrit
 
 import (
 	"net/http"
-	"time"
 )
 
 type Gerrit struct {
@@ -17,12 +16,12 @@ type Gerrit struct {
 	Config   *ConfigService
 }
 
-func NewClient(gerritURL string) (*Gerrit, error) {
-	client := &http.Client{
-		Timeout: 15 * time.Second, // 设置超时时间
+func NewClient(gerritURL string, httpClient *http.Client) (*Gerrit, error) {
+	if httpClient == nil {
+		httpClient = defaultClient
 	}
 
-	r := &Requester{client: client}
+	r := &Requester{client: httpClient}
 
 	if baseURL, err := SetBaseURL(gerritURL); err != nil {
 		return nil, err
