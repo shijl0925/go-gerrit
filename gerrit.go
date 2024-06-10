@@ -3,6 +3,7 @@ package gerrit
 import (
 	"log"
 	"net/http"
+	"time"
 )
 
 type Gerrit struct {
@@ -19,7 +20,9 @@ type Gerrit struct {
 
 func NewClient(gerritURL string, httpClient *http.Client) (*Gerrit, error) {
 	if httpClient == nil {
-		httpClient = http.DefaultClient
+		httpClient = &http.Client{
+			Timeout: 15 * time.Second, // 设置超时时间
+		}
 	}
 
 	r := &Requester{client: httpClient}
