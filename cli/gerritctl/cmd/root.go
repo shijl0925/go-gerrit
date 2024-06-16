@@ -50,7 +50,7 @@ type GerritMod struct {
 //
 // Returns
 func (g *GerritMod) Init(config Config) error {
-	g.Username = config.Username
+	g.Username = config.Account
 	g.Url = config.Url
 	g.Password = config.Password
 	g.Context = context.Background()
@@ -67,9 +67,9 @@ func (g *GerritMod) Init(config Config) error {
 
 // Config is focused in the configuration json file
 type Config struct {
-	Url            string `mapstructure: Url`
-	Username       string `mapstructure: Username`
-	Password       string `mapstructure: Password`
+	Url            string
+	Account        string
+	Password       string
 	ConfigPath     string
 	ConfigFileName string
 }

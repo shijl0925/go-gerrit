@@ -1,7 +1,6 @@
 package cmd
 
 import (
-	"errors"
 	"fmt"
 	"github.com/shijl0925/go-gerrit"
 	"github.com/spf13/cobra"
@@ -385,7 +384,7 @@ func init() {
 
 	project.AddCommand(projectList)
 	projectList.Flags().BoolP("all", "a", false, "List all projects")
-	projectList.Flags().IntP("limit", "l", 0, "Limit the number of projects to be included in the results")
+	projectList.Flags().IntP("limit", "l", 25, "Limit the number of projects to be included in the results")
 	projectList.Flags().IntP("skip", "S", 0, "Skip the first N projects in the results")
 	projectList.Flags().BoolP("description", "d", false, "Include the project description in the results")
 	projectList.Flags().StringP("prefix", "p", "", "Only include projects with the given prefix")

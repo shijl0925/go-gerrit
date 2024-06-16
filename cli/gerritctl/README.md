@@ -9,7 +9,7 @@ $ pushd ~/.config/gerritctl/
     $ vi config.json 
     {
         "Url": "https://gerrit.mydomain.com",
-        "Username": "xxx",
+        "Account": "xxx",
         "Password": "yyy"
     }
 $ popd
