@@ -6,6 +6,7 @@ import (
 	"crypto/tls"
 	"encoding/json"
 	"io"
+	"io/ioutil"
 	"net/http"
 	"net/url"
 	"reflect"
@@ -169,6 +170,14 @@ func (r *Requester) NewRequest(ctx context.Context, method, endpoint string, opt
 }
 
 func (r *Requester) Do(req *http.Request, v interface{}) (*http.Response, error) {
+	isText := false
+	if v != nil {
+		if _, ok := v.(*string); ok {
+			req.Header.Set("Accept", "text/plain")
+			isText = true
+		}
+	}
+
 	resp, err := r.client.Do(req)
 	if err != nil {
 		return resp, err
@@ -190,22 +199,25 @@ func (r *Requester) Do(req *http.Request, v interface{}) (*http.Response, error)
 				return nil, err
 			}
 		} else {
-			var body []byte
-			body, err = io.ReadAll(resp.Body)
-			if err != nil {
-				// even though there was an error, we still return the response
-				// in case the caller wants to inspect it further
-				return resp, err
+			if isText {
+				var body []byte
+				body, err = io.ReadAll(resp.Body)
+				if err != nil {
+					// even though there was an error, we still return the response
+					// in case the caller wants to inspect it further
+					return resp, err
+				}
+				body = RemoveMagicPrefixLine(body)
+
+				w := v.(*string)
+				*w = strings.Trim(string(body), "\"\n")
+
+			} else {
+				io.CopyN(ioutil.Discard, resp.Body, 5)
+				if err := json.NewDecoder(resp.Body).Decode(&v); err != nil {
+					return resp, err
+				}
 			}
-			body = RemoveMagicPrefixLine(body)
-			//log.Println(string(body))
-
-			err = json.Unmarshal(body, v)
-
-			//io.CopyN(ioutil.Discard, resp.Body, 5)
-			//if err := json.NewDecoder(resp.Body).Decode(&v); err != nil {
-			//	return resp, err
-			//}
 		}
 	}
 

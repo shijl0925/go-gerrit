@@ -32,10 +32,6 @@ func RemoveMagicPrefixLine(body []byte) []byte {
 		body = body[5:]
 	}
 
-	if bytes.Equal(body, []byte("ok")) || bytes.Equal(body, []byte("ok\n")) {
-		return []byte("\"ok\"\n")
-	}
-
 	return body
 }
 
