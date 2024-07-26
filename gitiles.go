@@ -86,7 +86,7 @@ type GitilesCommits struct {
 
 func (gs *Gitiles) GetCommit(ctx context.Context, project, commitID string) (*GitilesCommitInfo, *http.Response, error) {
 	v := new(GitilesCommitInfo)
-	u := fmt.Sprintf("plugins/gitiles/%s/+/%s", project, commitID)
+	u := fmt.Sprintf("%s/+/%s", project, commitID)
 	resp, err := gs.Requester.Call(ctx, "GET", u, nil, v)
 
 	if err != nil {
@@ -97,7 +97,7 @@ func (gs *Gitiles) GetCommit(ctx context.Context, project, commitID string) (*Gi
 
 func (gs *Gitiles) GetCommits(ctx context.Context, project, Ref string, opt *GitilesCommitsOptions) (*GitilesCommits, *http.Response, error) {
 	v := new(GitilesCommits)
-	u := fmt.Sprintf("plugins/gitiles/%s/+log/%s/", project, Ref)
+	u := fmt.Sprintf("%s/+log/%s/", project, Ref)
 
 	resp, err := gs.Requester.Call(ctx, "GET", u, opt, v)
 	if err != nil {

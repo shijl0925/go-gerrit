@@ -12,7 +12,7 @@ go get github.com/shijl0925/go-gerrit
 
 ## Usage
 
-Use `gerrit.NewClient` to create a new client. It needs a Gerrit baseUrl and username / password, and optionally accepts
+Use `gerrit.NewClient` to create a new Gerrit client. It needs a Gerrit baseUrl and username / password, and optionally accepts
 an existing `*http.Client`.
 
 After creating the client, create a new request from one of the endpoint-specific packages, i.e.
@@ -43,5 +43,34 @@ func main() {
     for name, project := range projects {
         fmt.Printf("Project Name: %s, ID: %s, State: %s\n", name, project.ID, project.State)
     }
+}
+
+
+Use `gerrit.NewGitilesClient` to create a new Gitiles client. It needs a Gitiles baseUrl and username / password, and optionally accepts
+an existing `*http.Client`.
+
+```go
+package main
+import (
+    "context"
+    "fmt"
+    "github.com/shijl0925/go-gerrit"
+    "log"
+)
+
+func main() {
+    ctx := context.Background()
+    // baseUrl := "http://127.0.0.1:8080/plugins/gitiles/"
+    baseUrl := "https://gerrit.googlesource.com/"
+    client, _ := gerrit.NewGitilesClient(baseUrl, nil)
+
+    projectName := "gerrit"
+	commitID := "ec36cba6080bac72790c7875c36f5b86fc55372c"
+    commit, _, err := client.GetCommit(ctx, projectName, commitID)
+
+    if err != nil {
+        log.Panicf("Gitiles.GetCommit returned error: %v", err)
+    }
+    log.Printf("Commit: %v", commit)
 }
 ```
