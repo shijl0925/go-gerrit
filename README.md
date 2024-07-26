@@ -65,7 +65,7 @@ func main() {
     client, _ := gerrit.NewGitilesClient(baseUrl, nil)
 
     projectName := "gerrit"
-	commitID := "ec36cba6080bac72790c7875c36f5b86fc55372c"
+    commitID := "ec36cba6080bac72790c7875c36f5b86fc55372c"
     commit, _, err := client.GetCommit(ctx, projectName, commitID)
 
     if err != nil {
