@@ -4,10 +4,43 @@ import (
 	"context"
 	"fmt"
 	"net/http"
+	"time"
 )
 
-type GitilesService struct {
-	gerrit *Gerrit
+type Gitiles struct {
+	Requester *Requester
+}
+
+func (gs *Gitiles) SetBasicAuth(username, password string) {
+	gs.Requester.SetAuth("basic", username, password)
+}
+
+func (gs *Gitiles) SetDigestAuth(username, password string) {
+	gs.Requester.SetAuth("digest", username, password)
+}
+
+func (gs *Gitiles) SetCookieAuth(username, password string) {
+	gs.Requester.SetAuth("cookie", username, password)
+}
+
+func NewGitilesClient(gitilesURL string, httpClient *http.Client) (*Gitiles, error) {
+	if httpClient == nil {
+		httpClient = &http.Client{
+			Timeout: 15 * time.Second, // 设置超时时间
+		}
+	}
+
+	r := &Requester{client: httpClient}
+
+	if baseURL, err := SetBaseURL(gitilesURL); err != nil {
+		return nil, err
+	} else {
+		r.baseURL = baseURL
+	}
+
+	gitiles := &Gitiles{Requester: r}
+
+	return gitiles, nil
 }
 
 type GitilesCommitsOptions struct {
@@ -51,22 +84,22 @@ type GitilesCommits struct {
 	Next     string              `json:"next,omitempty"`
 }
 
-func (s *GitilesService) GetCommit(ctx context.Context, project, commitID string) (*GitilesCommitInfo, *http.Response, error) {
+func (gs *Gitiles) GetCommit(ctx context.Context, project, commitID string) (*GitilesCommitInfo, *http.Response, error) {
 	v := new(GitilesCommitInfo)
 	u := fmt.Sprintf("plugins/gitiles/%s/+/%s", project, commitID)
+	resp, err := gs.Requester.Call(ctx, "GET", u, nil, v)
 
-	resp, err := s.gerrit.Requester.Call(ctx, "GET", u, nil, v)
 	if err != nil {
 		return nil, resp, err
 	}
 	return v, resp, nil
 }
 
-func (s *GitilesService) GetCommits(ctx context.Context, project, Ref string, opt *GitilesCommitsOptions) (*GitilesCommits, *http.Response, error) {
+func (gs *Gitiles) GetCommits(ctx context.Context, project, Ref string, opt *GitilesCommitsOptions) (*GitilesCommits, *http.Response, error) {
 	v := new(GitilesCommits)
 	u := fmt.Sprintf("plugins/gitiles/%s/+log/%s/", project, Ref)
 
-	resp, err := s.gerrit.Requester.Call(ctx, "GET", u, opt, v)
+	resp, err := gs.Requester.Call(ctx, "GET", u, opt, v)
 	if err != nil {
 		return nil, resp, err
 	}

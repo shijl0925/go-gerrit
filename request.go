@@ -7,6 +7,7 @@ import (
 	"encoding/json"
 	"io"
 	"io/ioutil"
+	"log"
 	"net/http"
 	"net/url"
 	"reflect"
@@ -236,4 +237,37 @@ func (r *Requester) Call(ctx context.Context, method, u string, opt interface{},
 	}
 
 	return resp, nil
+}
+
+// SetAuth 用于设置不同类型的认证方式。
+// authType: 认证类型，可以是 "basic"、"digest" 或 "cookie"。
+// username: 用户名。
+// password: 密码。
+func (r *Requester) SetAuth(authType, username, password string) {
+	// 参数验证
+	if authType == "" || username == "" || password == "" {
+		// 根据实际情况，这里可以记录日志、抛出异常或返回错误
+		log.Fatal("authType, username, and password cannot be empty")
+		return
+	}
+
+	// 对authType值进行校验，确保其为允许的值之一
+	allowedAuthTypes := []string{"basic", "digest", "cookie"}
+
+	found := false
+	for _, allowedType := range allowedAuthTypes {
+		if authType == allowedType {
+			found = true
+			break
+		}
+	}
+	if !found {
+		// 根据实际情况，这里可以记录日志、抛出异常或返回错误
+		log.Fatal("Unsupported authType")
+		return
+	}
+
+	r.authType = authType
+	r.username = username
+	r.password = password
 }
