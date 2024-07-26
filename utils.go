@@ -7,6 +7,7 @@ import (
 	"io"
 	"net/http"
 	"net/url"
+	"reflect"
 	"strings"
 )
 
@@ -65,16 +66,29 @@ func CheckResponse(r *http.Response) error {
 }
 
 func addOptions(s string, opt interface{}) (string, error) {
-	u, err := url.Parse(s)
+	v := reflect.ValueOf(opt)
+
+	if v.Kind() == reflect.Ptr && v.IsNil() {
+		return s, nil
+	}
+
+	origURL, err := url.Parse(s)
 	if err != nil {
 		return s, err
 	}
 
-	qs, err := query.Values(opt)
+	origValues := origURL.Query()
+
+	newValues, err := query.Values(opt)
 	if err != nil {
 		return s, err
 	}
 
-	u.RawQuery = qs.Encode()
-	return u.String(), nil
+	for k, v := range newValues {
+		origValues[k] = v
+	}
+
+	origURL.RawQuery = origValues.Encode()
+
+	return origURL.String(), nil
 }

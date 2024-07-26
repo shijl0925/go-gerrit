@@ -5,6 +5,7 @@ import (
 	"context"
 	"crypto/tls"
 	"encoding/json"
+	"fmt"
 	"io"
 	"io/ioutil"
 	"log"
@@ -97,12 +98,15 @@ func (r *Requester) NewRequest(ctx context.Context, method, endpoint string, opt
 	// If there is a "/" at the start, remove it.
 	urlStr := strings.TrimPrefix(endpoint, "/")
 
+	baseURL := r.baseURL.String()
+
 	// If we are authenticated, let's apply the "a/" prefix,
 	if hasAuth {
-		urlStr = "a/" + urlStr
+		u, _ := url.Parse(baseURL)
+		baseURL = fmt.Sprintf("%s://%s/a%s", u.Scheme, u.Host, u.Path)
 	}
 
-	urlStr = r.baseURL.String() + urlStr
+	urlStr = baseURL + urlStr
 
 	if method == http.MethodGet {
 		u, err := addOptions(urlStr, opt)
