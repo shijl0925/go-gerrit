@@ -44,7 +44,7 @@ func main() {
         fmt.Printf("Project Name: %s, ID: %s, State: %s\n", name, project.ID, project.State)
     }
 }
-
+```
 
 Use `gerrit.NewGitilesClient` to create a new Gitiles client. It needs a Gitiles baseUrl and username / password, and optionally accepts
 an existing `*http.Client`.
