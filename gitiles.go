@@ -78,15 +78,22 @@ type GitilesCommitInfo struct {
 	TreeDiff  []GitilesDiffInfo `json:"tree_diff,omitempty"`
 }
 
-type GitilesCommits struct {
+type GitilesLogs struct {
 	Log      []GitilesCommitInfo `json:"log"`
 	Previous string              `json:"previous,omitempty"`
 	Next     string              `json:"next,omitempty"`
 }
 
+type GitilesRef struct {
+	Value  string `json:"value"`
+	Target string `json:"target,omitempty"`
+	Peeled string `json:"peeled,omitempty"`
+}
+
 func (gs *Gitiles) GetCommit(ctx context.Context, project, commitID string) (*GitilesCommitInfo, *http.Response, error) {
 	v := new(GitilesCommitInfo)
-	u := fmt.Sprintf("%s/+/%s", project, commitID)
+	u := fmt.Sprintf("%s/+/%s?format=JSON", project, commitID)
+
 	resp, err := gs.Requester.Call(ctx, "GET", u, nil, v)
 
 	if err != nil {
@@ -95,9 +102,9 @@ func (gs *Gitiles) GetCommit(ctx context.Context, project, commitID string) (*Gi
 	return v, resp, nil
 }
 
-func (gs *Gitiles) GetCommits(ctx context.Context, project, Ref string, opt *GitilesCommitsOptions) (*GitilesCommits, *http.Response, error) {
-	v := new(GitilesCommits)
-	u := fmt.Sprintf("%s/+log/%s/", project, Ref)
+func (gs *Gitiles) GetRefLogs(ctx context.Context, project, Ref string, opt *GitilesCommitsOptions) (*GitilesLogs, *http.Response, error) {
+	v := new(GitilesLogs)
+	u := fmt.Sprintf("%s/+log/%s/?format=JSON", project, Ref)
 
 	resp, err := gs.Requester.Call(ctx, "GET", u, opt, v)
 	if err != nil {
@@ -105,3 +112,25 @@ func (gs *Gitiles) GetCommits(ctx context.Context, project, Ref string, opt *Git
 	}
 	return v, resp, nil
 }
+
+func (gs *Gitiles) GetRefs(ctx context.Context, project string) (map[string]GitilesRef, *http.Response, error) {
+	v := make(map[string]GitilesRef)
+	u := fmt.Sprintf("%s/+refs?format=JSON", project)
+
+	resp, err := gs.Requester.Call(ctx, "GET", u, nil, &v)
+	if err != nil {
+		return nil, resp, err
+	}
+	return v, resp, nil
+}
+
+// func (gs *Gitiles) DownloadFile(ctx context.Context, project, Ref, path string) (string, *http.Response, error) {
+// 	v := new(string)
+// 	u := fmt.Sprintf("%s/+/%s/%s?format=TEXT", project, Ref, path)
+
+// 	resp, err := gs.Requester.Call(ctx, "GET", u, nil, v)
+// 	if err != nil {
+// 		return "", resp, err
+// 	}
+// 	return *v, resp, nil
+// }
