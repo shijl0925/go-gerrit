@@ -2,7 +2,6 @@
 
 [![Quality Gate Status](https://sonarcloud.io/api/project_badges/measure?project=shijl0925_go-gerrit&metric=alert_status)](https://sonarcloud.io/summary/new_code?id=shijl0925_go-gerrit)
 [![Codacy Badge](https://api.codacy.com/project/badge/Grade/9fed6a9c3725480db1aa6187b6926ca1)](https://app.codacy.com/gh/shijl0925/go-gerrit?utm_source=github.com&utm_medium=referral&utm_content=shijl0925/go-gerrit&utm_campaign=Badge_Grade)
-[![image](https://img.shields.io/github/license/shijl0925/python-gerrit-api.svg)](LICENSE)
 
 go-gerrit is a [Go](https://golang.org/) client library for the [Gerrit Code Review](https://www.gerritcodereview.com/) system.
 
