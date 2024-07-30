@@ -1,5 +1,7 @@
 # go-gerrit
 
+[![Codacy Badge](https://api.codacy.com/project/badge/Grade/9fed6a9c3725480db1aa6187b6926ca1)](https://app.codacy.com/gh/shijl0925/go-gerrit?utm_source=github.com&utm_medium=referral&utm_content=shijl0925/go-gerrit&utm_campaign=Badge_Grade)
+
 go-gerrit is a [Go](https://golang.org/) client library for the [Gerrit Code Review](https://www.gerritcodereview.com/) system.
 
 See https://pkg.go.dev/github.com/shijl0925/go-gerrit for supported endpoints.
