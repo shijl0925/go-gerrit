@@ -1,6 +1,6 @@
 module github.com/shijl0925/go-gerrit/cli/gerritctl
 
-go 1.21.13
+go 1.21
 
 require (
 	github.com/shijl0925/go-gerrit v0.0.0-20240610041831-4860139f8227
