@@ -7,7 +7,6 @@ import (
 	"encoding/json"
 	"fmt"
 	"io"
-	"io/ioutil"
 	"log"
 	"net/http"
 	"net/url"
@@ -218,7 +217,7 @@ func (r *Requester) Do(req *http.Request, v interface{}) (*http.Response, error)
 				*w = strings.Trim(string(body), "\"\n")
 
 			} else {
-				io.CopyN(ioutil.Discard, resp.Body, 5)
+				io.CopyN(io.Discard, resp.Body, 5)
 				if err := json.NewDecoder(resp.Body).Decode(&v); err != nil {
 					return resp, err
 				}
