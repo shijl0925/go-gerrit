@@ -217,7 +217,9 @@ func (r *Requester) Do(req *http.Request, v interface{}) (*http.Response, error)
 				*w = strings.Trim(string(body), "\"\n")
 
 			} else {
-				io.CopyN(io.Discard, resp.Body, 5)
+				if _, err := io.CopyN(io.Discard, resp.Body, 5); err != nil {
+					return resp, err
+				}
 				if err := json.NewDecoder(resp.Body).Decode(&v); err != nil {
 					return resp, err
 				}
