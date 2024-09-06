@@ -59,7 +59,7 @@ func CheckResponse(r *http.Response) error {
 	data, err := io.ReadAll(r.Body)
 	if err == nil && data != nil {
 		errorResponse.Body = data
-		errorResponse.Message = fmt.Sprintf("%s", data)
+		errorResponse.Message = string(data)
 	}
 
 	return errorResponse
