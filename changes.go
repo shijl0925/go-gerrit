@@ -664,9 +664,7 @@ func (s *ChangeService) Get(ctx context.Context, changeID string, AdditionalFiel
 	change := Change{Raw: new(ChangeInfo), gerrit: s.gerrit, Base: changeID}
 
 	opt := new(ChangeOptions)
-	for _, field := range AdditionalFields {
-		opt.AdditionalFields = append(opt.AdditionalFields, field)
-	}
+	opt.AdditionalFields = append(opt.AdditionalFields, AdditionalFields...)
 
 	resp, err := change.Poll(ctx, opt)
 	if err != nil {
