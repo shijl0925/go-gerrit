@@ -119,7 +119,7 @@ type SubmitRequirementInput struct {
 	ApplicabilityExpression      string `json:"applicability_expression,omitempty"`
 	SubmittabilityExpression     string `json:"submittability_expression"`
 	OverrideExpression           string `json:"override_expression,omitempty"`
-	AllowOverrideInChildProjects bool   `json:"allow_override_in_child_projects,omitempt"`
+	AllowOverrideInChildProjects bool   `json:"allow_override_in_child_projects,omitempty"`
 }
 
 type SubmitRequirementResultInfo struct {
