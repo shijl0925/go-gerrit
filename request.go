@@ -175,11 +175,9 @@ func (r *Requester) NewRequest(ctx context.Context, method, endpoint string, opt
 
 func (r *Requester) Do(req *http.Request, v interface{}) (*http.Response, error) {
 	isText := false
-	if v != nil {
-		if _, ok := v.(*string); ok {
-			req.Header.Set("Accept", "text/plain")
-			isText = true
-		}
+	if _, ok := v.(*string); ok {
+		req.Header.Set("Accept", "text/plain")
+		isText = true
 	}
 
 	resp, err := r.client.Do(req)
