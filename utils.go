@@ -37,7 +37,6 @@ func RemoveMagicPrefixLine(body []byte) []byte {
 }
 
 type ErrorResponse struct {
-	Body     []byte
 	Response *http.Response
 	Message  string
 }
@@ -58,7 +57,6 @@ func CheckResponse(r *http.Response) error {
 	errorResponse := &ErrorResponse{Response: r}
 	data, err := io.ReadAll(r.Body)
 	if err == nil && data != nil {
-		errorResponse.Body = data
 		errorResponse.Message = string(data)
 	}
 
