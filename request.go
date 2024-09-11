@@ -21,7 +21,7 @@ var transport = &http.Transport{
 	MaxIdleConns:        100, // 调整为100以允许更多的连接复用
 	IdleConnTimeout:     60 * time.Second,
 	TLSHandshakeTimeout: 15 * time.Second,
-	TLSClientConfig:     &tls.Config{InsecureSkipVerify: true},
+	TLSClientConfig:     &tls.Config{InsecureSkipVerify: false},
 }
 
 // DefaultClient is the default http client for got requests.
