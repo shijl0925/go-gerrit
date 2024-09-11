@@ -34,3 +34,15 @@ jobs:
           version: v1.56.1
           args: --verbose --timeout=3m
           skip-cache: true
+
+  secure-tests:
+    runs-on: ubuntu-latest
+    env:
+      GO111MODULE: on
+    steps:
+      - name: Checkout Source
+        uses: actions/checkout@v3
+      - name: Run Gosec Security Scanner
+        uses: securego/gosec@master
+        with:
+          args: ./...
